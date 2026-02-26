@@ -1,0 +1,17 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Dataset
+Backend/data/
+*.csv
+
+# Environment files
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+Backend/.venv/ 
