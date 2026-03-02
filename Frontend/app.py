@@ -1,64 +1,72 @@
 import streamlit as st
 import requests
+import plotly.graph_objects as go
+import time
 
-st.set_page_config(page_title="Fraud Guard AI", layout="centered")
-st.title("💳 Online Payment Fraud Detector")
+# --- Page Branding ---
+st.set_page_config(page_title="OFD Prevention System", layout="wide", page_icon="🛡️")
 
-# Form for user input
-with st.form("transaction_form"):
-    st.subheader("Enter Transaction Details")
-    step = st.number_input("Time Step (Hour)", value=1, min_value=1)
-    amount = st.number_input("Transaction Amount ($)", value=0.0)
-    
-    col1, col2 = st.columns(2)
-    old_orig = col1.number_input("Sender Old Balance", value=0.0)
-    new_orig = col2.number_input("Sender New Balance", value=0.0)
-    
-    col3, col4 = st.columns(2)
-    old_dest = col3.number_input("Receiver Old Balance", value=0.0)
-    new_dest = col4.number_input("Receiver New Balance", value=0.0)
-    
-    trans_type = st.selectbox("Transaction Type", ["CASH_OUT", "TRANSFER", "PAYMENT", "DEBIT", "CASH_IN"])
-    
-    submit = st.form_submit_button("Verify Transaction")
+st.title("🛡️ Online Fraud Detection & Prevention System")
+st.subheader("Real-Time Financial Security Dashboard")
+st.markdown("---")
 
-if submit:
-    # Prepare the payload for FastAPI
-    payload = {
-        "step": step, 
-        "amount": amount,
-        "oldbalanceOrg": old_orig, 
-        "newbalanceOrg": new_orig,
-        "oldbalanceDest": old_dest, 
-        "newbalanceDest": new_dest,
-        "CASH_OUT": 1 if trans_type == "CASH_OUT" else 0,
-        "TRANSFER": 1 if trans_type == "TRANSFER" else 0,
-        "DEBIT": 1 if trans_type == "DEBIT" else 0,
-        "PAYMENT": 1 if trans_type == "PAYMENT" else 0
-    }
-    
-    try:
-        # Send request to Backend
-        response = requests.post("http://127.0.0.1:8000/detect", json=payload)
-        res = response.json()
-        
-        # Clean confidence score for display
-        conf_str = res['confidence'].replace('%', '')
-        confidence_val = float(conf_str) / 100
-        
-        st.divider()
-        st.subheader("Analysis Results")
-        
-        # Visual Risk Indicator
-        if res["is_fraud"] == 1:
-            st.error(f"🚨 FRAUD ALERT! Confidence: {res['confidence']}")
-            st.progress(confidence_val)
-        elif confidence_val > 0.10: # Flagging suspicious cases above 10%
-            st.warning(f"⚠️ SUSPICIOUS PATTERN. Confidence: {res['confidence']}")
-            st.progress(confidence_val)
-        else:
-            st.success(f"✅ TRANSACTION SAFE. Confidence: {res['confidence']}")
-            st.progress(confidence_val)
+tab1, tab2 = st.tabs(["🔍 Transaction Analysis", "📡 Live Security Stream"])
 
-    except Exception as e:
-        st.error("❌ Connection to Backend failed. Ensure 'uvicorn main:app' is running.")
+with tab1:
+    col_input, col_viz = st.columns([1, 1.5])
+    
+    with col_input:
+        st.write("### Input Parameters")
+        amt = st.number_input("Transaction Amount ($)", min_value=0.0, value=5000.0)
+        t_type = st.selectbox("Transaction Type", ["TRANSFER", "CASH_OUT", "PAYMENT", "DEBIT"])
+        old_bal = st.number_input("Origin Account Balance", value=10000.0)
+        new_bal = st.number_input("Resulting Account Balance", value=5000.0)
+
+        payload = {
+            "step": 1, "amount": amt, "oldbalanceOrg": old_bal, "newbalanceOrg": new_bal,
+            "oldbalanceDest": 0.0, "newbalanceDest": amt,
+            "TRANSFER": 1 if t_type == "TRANSFER" else 0,
+            "CASH_OUT": 1 if t_type == "CASH_OUT" else 0,
+            "PAYMENT": 1 if t_type == "PAYMENT" else 0,
+            "DEBIT": 1 if t_type == "DEBIT" else 0
+        }
+
+        if st.button("🚀 Run Security Scan"):
+            try:
+                # Connected to Port 8001
+                response = requests.post("http://localhost:8001/detect", json=payload)
+                if response.status_code == 200:
+                    st.session_state['res'] = response.json()
+            except:
+                st.error("Connection Error: Is the OFD Backend running on port 8001?")
+
+    with col_viz:
+        if 'res' in st.session_state:
+            res = st.session_state['res']
+            score = float(res['confidence'].replace("%", ""))
+            
+            # Risk Gauge with 2026 'stretch' parameter
+            fig = go.Figure(go.Indicator(
+                mode = "gauge+number",
+                value = score,
+                title = {'text': f"Risk Assessment: {res['risk_level']}"},
+                gauge = {
+                    'axis': {'range': [0, 100]},
+                    'bar': {'color': "red" if score > 75 else "orange" if score > 40 else "green"}
+                }
+            ))
+            st.plotly_chart(fig, width='stretch')
+            st.info(f"**Security Reasoning:** {res['reasoning']}")
+
+with tab2:
+    st.write("### 📡 Live Institutional Monitoring")
+    if st.button("Initiate Network Stream"):
+        log_box = st.empty()
+        log_data = []
+        for i in range(10):
+            is_fraud = i % 4 == 0
+            status = "🚨 BLOCKED" if is_fraud else "✅ CLEAN"
+            log_entry = f"[{time.strftime('%H:%M:%S')}] TXN-{2000+i}: {status} | Risk: {92 if is_fraud else i*6}%"
+            log_data.insert(0, log_entry)
+            log_box.code("\n".join(log_data))
+            time.sleep(0.5)

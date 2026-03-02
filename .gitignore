@@ -1,17 +1,14 @@
-# Python
+# Python environment
 .venv/
-venv/
 __pycache__/
 *.pyc
 
-# Dataset
-Backend/data/
-*.csv
+# Data and Models
+Backend/data/*.csv
+!Backend/data/sample_data.csv
+Backend/fraud_model.json
+Backend/features.npy
 
-# Environment files
-.env
-
-# OS
+# Streamlit/OS
+.streamlit/
 .DS_Store
-Thumbs.db
-Backend/.venv/ 

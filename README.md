@@ -1,17 +1,21 @@
-# 🛡️ Online Payment Fraud Detection
+# 🛡️ Online Fraud Detection & Prevention System (OFDPS)
 
-An end-to-end Machine Learning application designed to identify fraudulent transactions. This project features a Python backend for data processing and a Streamlit frontend for real-time user interaction.
+An enterprise-grade Machine Learning solution designed to identify and intercept fraudulent financial transactions in real-time.
 
 ## 📊 App Preview
 ![Detection Interface](detect.png)
-*Real-time prediction interface for transaction analysis.*
+*Real-time risk assessment interface.*
 
-![Fraud Result](fraud%20detect.png)
-*Result display for fraudulent vs. legitimate transactions.*
+## 🚀 Key Features
+* **Balanced AI Intelligence**: XGBoost model optimized with **SMOTE** to detect rare fraud patterns.
+* **High-Performance API**: Backend built with **FastAPI** and **Pydantic** for strict data validation.
+* **Explainable AI (XAI)**: Provides human-readable reasoning for security flags.
+* **2026 Compliant UI**: Responsive **Streamlit** dashboard with live risk gauges.
 
+## ⚙️ Quick Start
 
-## 📁 Project Structure
-* **Backend/**: Contains `main.py` (logic), `model.py` (loading), and model files (`.json`, `.npy`).
-* **Frontend/**: Contains `app.py` for the web interface.
-* **.gitignore**: Configured to exclude heavy virtual environments and large datasets.
-
+### 1. Setup
+```bash
+python -m venv .venv
+# Windows: .venv\Scripts\activate | Mac/Linux: source .venv/bin/activate
+pip install -r requirements.txt
