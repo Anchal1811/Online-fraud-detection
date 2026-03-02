@@ -2,9 +2,7 @@
 
 An enterprise-grade Machine Learning solution designed to identify and intercept fraudulent financial transactions in real-time.
 
-## 📊 App Preview
-![Detection Interface](detect.png)
-*Real-time risk assessment interface.*
+
 
 ## 🚀 Key Features
 * **Balanced AI Intelligence**: XGBoost model optimized with **SMOTE** to detect rare fraud patterns.
